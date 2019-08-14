@@ -3,154 +3,226 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 
+/// <summary>
+/// 转盘控制器
+/// </summary>
 public class CarouselController : MonoBehaviour
 {
+    /// <summary>
+    /// 左右上下激活
+    /// </summary>
+    [Header("Inputs")] public KeyCode leftKey;
 
-    [Header("Inputs")]
-    public KeyCode leftKey;
     public KeyCode rightKey;
     public KeyCode upKey;
     public KeyCode downKey;
     public KeyCode activateKey;
 
-    [Header("Logic")]
-    public ActivatePanelUI activatePanelUI;
+    /// <summary>
+    /// 激活面板 (激活按钮)
+    /// </summary>
+    [Header("Logic")] public ActivatePanelUI activatePanelUI;
+    
+    /// <summary>
+    /// 档案面板 UI (技能介绍)
+    /// </summary>
     public ProfilePanelUI profilePanelUI;
-    public CardBehaviour[] carouselCardBehaviours;
-    private CardBehaviour currentCard;
-    private int currentCardID = 0;
-    private bool carouselIsMoving = false;
-    private int activatedCardID;
 
-    [Header("Carousel Movement Settings")]
-    public Transform carouselRootTransform;
+    /// <summary>
+    /// 卡片
+    /// </summary>
+    public CardBehaviour[] carouselCardBehaviours;
+    
+    /// <summary>
+    /// 当前卡片
+    /// </summary>
+    private CardBehaviour _currentCard;
+    
+    /// <summary>
+    /// 当前卡片 ID, 默认0
+    /// </summary>
+    private int _currentCardId = 0;
+    
+    /// <summary>
+    /// 转盘是否在移动
+    /// </summary>
+    private bool _carouselIsMoving = false;
+    
+    /// <summary>
+    /// 激活的卡片 ID
+    /// </summary>
+    private int _activatedCardId;
+
+    /// <summary>
+    /// 转盘根
+    /// </summary>
+    [Header("Carousel Movement Settings")] public Transform carouselRootTransform;
+    
+    /// <summary>
+    /// 移动时间
+    /// </summary>
     public float movementDuration;
 
-    void Start()
+    /// <summary>
+    /// Init
+    /// </summary>
+    private void Start()
     {
-        currentCard = carouselCardBehaviours[currentCardID];
+        _currentCard = carouselCardBehaviours[_currentCardId];
 
         ActivateFirstCard();
         ShowCurrentCardTextInfo();
         SetNewCardProfilePanelUI();
     }
 
-    void Update()
+    private void Update()
     {
-
-        if(!carouselIsMoving)
+        if (!_carouselIsMoving)
         {
-            if(Input.GetKeyDown(leftKey) || Input.GetKeyDown(upKey))
+            if (Input.GetKeyDown(leftKey) || Input.GetKeyDown(upKey))
             {
                 RotateCarousel(-1);
             }
 
-            if(Input.GetKeyDown(rightKey) || Input.GetKeyDown(downKey))
+            if (Input.GetKeyDown(rightKey) || Input.GetKeyDown(downKey))
             {
                 RotateCarousel(1);
             }
 
-            if(Input.GetKeyDown(activateKey))
+            if (Input.GetKeyDown(activateKey))
             {
-		if(activatedCardID != currentCardID)
-		{
-                	ActivateCurrentCard();
-		}
+                if (_activatedCardId != _currentCardId)
+                {
+                    ActivateCurrentCard();
+                }
             }
         }
     }
 
-    void RotateCarousel(int rotationDirection)
+    /// <summary>
+    /// 旋转转盘
+    /// </summary>
+    /// <param name="rotationDirection">距离</param>
+    private void RotateCarousel(int rotationDirection)
     {
-
-        carouselIsMoving = true;
+        _carouselIsMoving = true;
 
         HideCurrentCardTextInfo();
+        
         CalculateActivatedPanelState();
 
-
-        carouselRootTransform.DORotate(new Vector3(0, 90 * rotationDirection, 0), movementDuration, RotateMode.LocalAxisAdd).SetRelative().OnComplete(()=>CarouselMovementEnded(rotationDirection));
-
+        carouselRootTransform
+            .DORotate(new Vector3(0, 90 * rotationDirection, 0), movementDuration, RotateMode.LocalAxisAdd)
+            .SetRelative().OnComplete(() => CarouselMovementEnded(rotationDirection));
     }
 
-    void CarouselMovementEnded(int newCurrentCardIntDifference)
+    /// <summary>
+    /// 转盘运动结束后
+    /// </summary>
+    /// <param name="newCurrentCardIntDifference">距离之前卡片的差值</param>
+    private void CarouselMovementEnded(int newCurrentCardIntDifference)
     {
-
-        currentCardID -= newCurrentCardIntDifference;
-        if(currentCardID < 0)
+        _currentCardId -= newCurrentCardIntDifference;
+        
+        if (_currentCardId < 0)
         {
-            currentCardID = carouselCardBehaviours.Length - 1;
-        } else if(currentCardID > carouselCardBehaviours.Length - 1)
+            _currentCardId = carouselCardBehaviours.Length - 1;
+        }
+        else if (_currentCardId > carouselCardBehaviours.Length - 1)
         {
-            currentCardID = 0;
+            _currentCardId = 0;
         }
 
-        currentCard = carouselCardBehaviours[currentCardID];
+        _currentCard = carouselCardBehaviours[_currentCardId];
 
         SetNewCardProfilePanelUI();
+        
         ShowCurrentCardTextInfo();
 
-        carouselIsMoving = false;
-        
-        CalculateActivatedPanelState();
+        _carouselIsMoving = false;
 
+        CalculateActivatedPanelState();
     }
 
-    void SetNewCardProfilePanelUI()
-    {        
+    /// <summary>
+    /// 设置文档
+    /// </summary>
+    private void SetNewCardProfilePanelUI()
+    {
         profilePanelUI.SetNewCardData(
-            currentCard.cardData.profileName,
-            currentCard.cardData.profileIcon,
-            currentCard.cardData.descriptionText,
-            currentCard.cardData.skills
+            _currentCard.cardData.profileName,
+            _currentCard.cardData.profileIcon,
+            _currentCard.cardData.descriptionText,
+            _currentCard.cardData.skills
         );
+    }
+
+    /// <summary>
+    /// 显示当前卡片文字信息 <see cref="HideCurrentCardTextInfo"/>
+    /// </summary>
+    private void ShowCurrentCardTextInfo()
+    {
+        _currentCard.SetNewCardTextState(true);
+    }
+
+    /// <summary>
+    /// 隐藏当前卡片文字信息 (未被激活, 卡片内的一些东西无需展示)
+    /// </summary>
+    private void HideCurrentCardTextInfo()
+    {
+        _currentCard.SetNewCardTextState(false);
+    }
+
+    /// <summary>
+    /// 激活第一个卡片 (默认)
+    /// </summary>
+    private void ActivateFirstCard()
+    {
+        _activatedCardId = _currentCardId;
+        carouselCardBehaviours[_activatedCardId].SetActivatedState(true);
+        CalculateActivatedPanelState();
+    }
+
+    /// <summary>
+    /// 激活当前卡片
+    /// </summary>
+    private void ActivateCurrentCard()
+    {
+        // 取消激活当前
+        carouselCardBehaviours[_activatedCardId].SetActivatedState(false);
         
-    }
-
-    void ShowCurrentCardTextInfo()
-    {
-        currentCard.SetNewCardTextState(true);
-    }
-
-    void HideCurrentCardTextInfo()
-    {
-        currentCard.SetNewCardTextState(false);
-    }
-
-    void ActivateFirstCard()
-	{
-        activatedCardID = currentCardID;
-        carouselCardBehaviours[activatedCardID].SetActivatedState(true);
+        // 更新 ID
+        _activatedCardId = _currentCardId;
+        
+        // 激活当前
+        carouselCardBehaviours[_activatedCardId].SetActivatedState(true);
+        
+        // 计算激活的面板状态
         CalculateActivatedPanelState();
     }
 
-    void ActivateCurrentCard()
+    /// <inheritdoc cref="ActivatePanelUI.SetNewVisuals"/>
+    /// <summary>
+    /// 计算激活的面板状态 (更新激活按钮) <see cref="ActivatePanelUI.SetNewVisuals"/>
+    /// </summary>
+    private void CalculateActivatedPanelState()
     {
-
-        carouselCardBehaviours[activatedCardID].SetActivatedState(false);
-        activatedCardID = currentCardID;
-        carouselCardBehaviours[activatedCardID].SetActivatedState(true);
-        CalculateActivatedPanelState();
-    }
-
-    void CalculateActivatedPanelState()
-    {
-
-        if(carouselIsMoving)
+        if (_carouselIsMoving)
         {
             activatePanelUI.SetNewVisuals(2);
             return;
         }
 
-        if(currentCardID == activatedCardID){
+        if (_currentCardId == _activatedCardId)
+        {
             activatePanelUI.SetNewVisuals(0);
             return;
         }
 
-        if(currentCardID != activatedCardID){
+        if (_currentCardId != _activatedCardId)
+        {
             activatePanelUI.SetNewVisuals(1);
             return;
         }
     }
-   
 }

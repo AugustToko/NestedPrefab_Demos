@@ -6,7 +6,9 @@ public class CameraFacingBillboard : MonoBehaviour
 {
     public Camera m_Camera;
  
-    //Orient the camera after all movement is completed this frame to avoid jittering
+    /// <summary>
+    /// 在此帧完成所有移动后确定相机的方向，以避免抖动
+    /// </summary>
     void LateUpdate()
     {
 
@@ -15,7 +17,5 @@ public class CameraFacingBillboard : MonoBehaviour
             transform.LookAt(transform.position + m_Camera.transform.rotation * Vector3.forward,
                 m_Camera.transform.rotation * Vector3.up);
         }
-
-
     }
 }

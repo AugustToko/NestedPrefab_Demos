@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 卡片行为
+/// </summary>
 public class CardBehaviour : MonoBehaviour
 {
     
@@ -9,38 +12,59 @@ public class CardBehaviour : MonoBehaviour
     public CardData cardData;
     
     //Logic
-    private bool isCurrentlyFocused = false;
-    private bool isCurrentlyActivated = false;
+    /// <summary>
+    /// 目前是重点
+    /// </summary>
+    private bool _isCurrentlyFocused = false;
+    
+    /// <summary>
+    /// 是否当前已激活
+    /// </summary>
+    private bool _isCurrentlyActivated = false;
 
+    /// <summary>
+    /// 卡显示隐藏和显示
+    /// </summary>
     [Header("Card Display")]
     public GameObject[] cardDisplaysToHideAndShow;
+    
+    /// <summary>
+    /// 展示 UI
+    /// </summary>
     public MedalDisplayUI medalDisplayUI;
 
-    void Awake()
+    private void Awake()
     {
+        // 循环设置当前激活项目
         for(int i = 0; i < cardDisplaysToHideAndShow.Length; i++)
         {
-            cardDisplaysToHideAndShow[i].SetActive(isCurrentlyFocused);
+            cardDisplaysToHideAndShow[i].SetActive(_isCurrentlyFocused);
         }
 
     }
 
+    /// <summary>
+    /// 设置新卡片文字状态, 然后循环设置激活
+    /// </summary>
+    /// <param name="newState">状态</param>
     public void SetNewCardTextState(bool newState)
     {
-        isCurrentlyFocused = newState;
+        _isCurrentlyFocused = newState;
 
         for(int i = 0; i < cardDisplaysToHideAndShow.Length; i++)
         {
-            cardDisplaysToHideAndShow[i].SetActive(isCurrentlyFocused);
+            cardDisplaysToHideAndShow[i].SetActive(_isCurrentlyFocused);
         }
-    
     }
 
+    /// <summary>
+    /// 设置激活状态
+    /// </summary>
+    /// <param name="newState"></param>
     public void SetActivatedState(bool newState)
     {
-        isCurrentlyActivated = newState;
-        medalDisplayUI.UpdateActivatedVisuals(isCurrentlyActivated);
-
+        _isCurrentlyActivated = newState;
+        medalDisplayUI.UpdateActivatedVisuals(_isCurrentlyActivated);
     }
 
 }

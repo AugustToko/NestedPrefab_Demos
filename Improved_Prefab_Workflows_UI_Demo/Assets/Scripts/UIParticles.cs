@@ -7,20 +7,12 @@ public class UIParticles : MaskableGraphic
     public bool useTransform;
     public Texture texture;
 
-    void Update()
+    private void Update()
     {
         SetVerticesDirty();
     }
 
-    public override Texture mainTexture
-    {
-        get
-        {
-            if (texture)
-                return texture;
-            return base.mainTexture;
-        }
-    }
+    public override Texture mainTexture => texture ? texture : base.mainTexture;
 
     protected override void OnPopulateMesh(Mesh m)
     {
